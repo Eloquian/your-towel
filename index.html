@@ -1779,7 +1779,7 @@
     ],
     'okay': [
       { label: 'Question 1', text: "What's brought you here today? Something specific, or just a sense that it's time?" },
-      { label: 'Question 2', text: 'What do you most want to have figured out by the time you\'re done?' },
+      { label: 'Question 2', text: "What do you most want to have figured out by the time you're done?" },
       { label: 'Question 3', text: "What's the thing you've been avoiding thinking about properly?" }
     ]
   };
@@ -1792,15 +1792,15 @@
 
   const zone2Groups = [
     {
-      label: 'Who you were',
-      framing: 'Think about your work before things got complicated. This isn\'t nostalgia. It\'s evidence.',
+      label: "Who you were",
+      framing: "Think about your work before things got complicated. This isn't nostalgia. It's evidence.",
       questions: [
         { key: 'q1', label: 'Question 1 of 7', text: "What kind of work made you lose track of time? Not the job title. The actual work." },
         { key: 'q2', label: 'Question 2 of 7', text: "Tell me about something you made or did that you're still quietly proud of. What made it good?" }
       ]
     },
     {
-      label: 'What you\'re made of',
+      label: "What you're made of",
       framing: "These are about what matters to you, not what you're supposed to say matters to you.",
       questions: [
         { key: 'q3', label: 'Question 3 of 7', text: "What's the one thing you won't budge on at work, even when it would be easier to just let it go?" },
@@ -1809,7 +1809,7 @@
       ]
     },
     {
-      label: 'Where you\'re headed',
+      label: "Where you're headed",
       framing: "Not a five-year plan. Just a direction. Vague is fine. Point at something.",
       questions: [
         { key: 'q6', label: 'Question 6 of 7', text: "If this all resolved tomorrow and you could point yourself anywhere professionally, where would you go?" },
@@ -1880,19 +1880,19 @@
     {
       key: 'z5q1',
       label: 'The move',
-      groupLabel: 'One move. That\'s all.',
+      groupLabel: "One move. That's all.",
       text: "Looking at your three prepared positions, what's your first move? It doesn't have to come from your favourite option, and it doesn't have to be a work move. Rest, recovery, or time away from all of this is a legitimate first move. It just has to be real and doable."
     },
     {
       key: 'z5q2',
       label: 'The timeframe',
-      groupLabel: 'One move. That\'s all.',
+      groupLabel: "One move. That's all.",
       text: "When will you do it? Give it a shape: a day, a week, a month. Vague is fine. Just point at something."
     },
     {
       key: 'z5q3',
       label: 'The why',
-      groupLabel: 'One move. That\'s all.',
+      groupLabel: "One move. That's all.",
       text: "In one sentence: why this move, now? Not a justification. Just the truth of it, in your own words."
     }
   ];
@@ -2140,7 +2140,7 @@
     const el = document.getElementById(id);
     if (!el) return;
     const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-    el.textContent = words === 0 ? 'Start writing when you\'re ready.' : `${words} words`;
+    el.textContent = words === 0 ? "Start writing when you're ready." : `${words} words`;
   }
 
   // ============================================================
