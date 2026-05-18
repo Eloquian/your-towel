@@ -2195,18 +2195,22 @@
 
   async function fetchPortrait() {
     try {
+      console.log('[DontPanic] fetchPortrait: calling API with answers:', JSON.stringify(state.zone2.answers));
       const res = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answers: state.zone2.answers, zone: 'portrait' })
       });
       const data = await res.json();
+      console.log('[DontPanic] fetchPortrait: API response status', res.status, 'data:', JSON.stringify(data));
       if (!res.ok || !data.bestWork) throw new Error(data.error || 'Bad response');
       state.portrait = data;
       saveState();
       showScreen('screen-2portrait');
     } catch(e) {
+      console.warn('[DontPanic] fetchPortrait: using fallback, error was:', e.message);
       state.portrait = generateFallbackPortrait();
+      console.log('[DontPanic] fetchPortrait: fallback portrait:', JSON.stringify(state.portrait));
       saveState();
       setTimeout(() => showScreen('screen-2portrait'), 1200);
     }
@@ -2227,13 +2231,18 @@
   // SCREEN 2portrait
   // ============================================================
   function mountScreen2Portrait() {
-    if (!state.portrait) return;
+    if (!state.portrait) {
+      console.warn('[DontPanic] mountScreen2Portrait: state.portrait is null, retrying fetch');
+      showScreen('screen-2loading');
+      return;
+    }
     const p = state.portrait;
+    console.log('[DontPanic] portrait data:', JSON.stringify(p));
 
-    document.getElementById('portrait-bestWork').textContent = p.bestWork || '';
-    document.getElementById('portrait-nonNegotiable').textContent = p.nonNegotiable || '';
-    document.getElementById('portrait-headed').textContent = p.headed || '';
-    document.getElementById('portrait-untried').textContent = p.untried || '';
+    document.getElementById('portrait-bestWork').textContent = p.bestWork || 'When I have the space to do the work properly.';
+    document.getElementById('portrait-nonNegotiable').textContent = p.nonNegotiable || 'My integrity and the quality of my work.';
+    document.getElementById('portrait-headed').textContent = p.headed || 'Somewhere I can make a genuine contribution.';
+    document.getElementById('portrait-untried').textContent = p.untried || 'The thing I keep putting off but know I should try.';
 
     // Animate quadrants
     const quadrants = document.querySelectorAll('.portrait-quadrant');
