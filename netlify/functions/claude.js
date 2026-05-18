@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async function(event, context) {
   if (event.httpMethod !== 'POST') {
     return {
@@ -85,10 +83,18 @@ Return only valid JSON.`
     });
 
     const data = await response.json();
+
+    if (!response.ok || !data.content || !data.content[0]) {
+      return {
+        statusCode: 502,
+        body: JSON.stringify({ error: 'Upstream API error', details: data })
+      };
+    }
+
     const text = data.content[0].text;
 
     // Strip any markdown fences just in case
-    const clean = text.replace(/```json|```/g, '').trim();
+    const clean = text.replace(/```json\n?|```/g, '').trim();
     const parsed = JSON.parse(clean);
 
     return {
