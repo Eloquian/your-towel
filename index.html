@@ -2756,6 +2756,14 @@
     // Load persisted state
     loadState();
 
+    // Discard portrait/optionsMap if they're malformed (e.g. error objects from a failed API call)
+    if (state.portrait && !state.portrait.bestWork) state.portrait = null;
+    if (state.optionsMap && !state.optionsMap.rightNow) state.optionsMap = null;
+
+    // If either is null but the screen expects it, step back to the loading screen
+    if (!state.portrait && state.currentScreen === 'screen-2portrait') state.currentScreen = 'screen-2loading';
+    if (!state.optionsMap && state.currentScreen === 'screen-3options') state.currentScreen = 'screen-3loading';
+
     // If token/board_id came from URL, override
     if (params.get('token')) state.miroToken = params.get('token');
     if (params.get('board_id')) state.boardId = params.get('board_id');
