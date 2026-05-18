@@ -1,0 +1,2816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Don't Panic — A Hitchhiker's Self-Assessment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Work+Sans:wght@300;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --ground:        #05000f;
+      --surface:       #2C2848;
+      --rose:          #E8758A;
+      --purple:        #330099;
+      --yellow:        #FFCD41;
+      --violet:        #534AB7;
+      --lilac:         #7F77DD;
+      --soft-lilac:    #AFA9EC;
+      --moonlight:     #E8EBF4;
+      --silver:        #C8C4D8;
+      --starlight:     #E4E2F0;
+      --gold-spark:    #EAC96A;
+      --text-primary:  #ffffff;
+      --text-body:     rgba(232,235,244,0.92);
+      --text-answered: rgba(232,235,244,0.68);
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 1; }
+    }
+    @keyframes burstRing {
+      from { width: 0; height: 0; opacity: 0.8; }
+      to   { width: 80px; height: 80px; opacity: 0; }
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Work Sans', sans-serif;
+      color: var(--text-primary);
+    }
+
+    /* ==============================
+       BACKGROUND
+    ============================== */
+    #bg {
+      position: fixed;
+      inset: 0;
+      background: var(--ground);
+      z-index: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .nebula-br {
+      position: absolute;
+      bottom: -15%;
+      right: -10%;
+      width: 60vw;
+      height: 60vh;
+      background: radial-gradient(circle, rgba(51,0,153,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .nebula-tl {
+      position: absolute;
+      top: -10%;
+      left: -5%;
+      width: 35vw;
+      height: 35vh;
+      background: radial-gradient(circle, rgba(51,0,153,0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .star {
+      position: absolute;
+      border-radius: 50%;
+      background: #E4E2F0;
+    }
+
+    .moon {
+      position: fixed;
+      top: 48px;
+      right: 64px;
+      width: 50px;
+      height: 50px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .sparkle-cluster {
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .sparkle-dot {
+      position: absolute;
+      border-radius: 50%;
+      width: 3px;
+      height: 3px;
+    }
+
+    /* ==============================
+       PROGRESS BAR & PART LABEL
+    ============================== */
+    #progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 2px;
+      background: rgba(232,117,138,0.70);
+      z-index: 100;
+      width: 0%;
+      transition: width 600ms ease;
+    }
+
+    #part-label {
+      position: fixed;
+      top: 24px;
+      left: 32px;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(175,169,236,0.80);
+      z-index: 100;
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+
+    /* ==============================
+       SCREEN SYSTEM
+    ============================== */
+    #app {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+    }
+
+    .screen {
+      display: none;
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      padding: 0 0 80px 0;
+      transition: opacity 300ms ease;
+    }
+
+    .screen.active {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* ==============================
+       BUTTONS
+    ============================== */
+    .btn-rose {
+      background: var(--rose);
+      color: white;
+      border: none;
+      padding: 14px 32px;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 14px;
+      letter-spacing: 1.2px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 200ms, transform 150ms;
+      position: relative;
+    }
+    .btn-rose:hover { background: #d4637a; transform: translateY(-1px); }
+    .btn-rose:disabled { background: rgba(232,117,138,0.35); cursor: not-allowed; transform: none; }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--soft-lilac);
+      border: 1px solid rgba(127,119,221,0.35);
+      padding: 12px 28px;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: border-color 200ms, color 200ms;
+    }
+    .btn-ghost:hover { border-color: rgba(127,119,221,0.65); color: var(--moonlight); }
+
+    /* ==============================
+       TYPOGRAPHY UTILITIES
+    ============================== */
+    .supertitle {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 14px;
+    }
+
+    .rose-rule {
+      border: none;
+      border-top: 1px solid var(--rose);
+      opacity: 0.6;
+      margin: 16px 0;
+    }
+
+    /* ==============================
+       SCREEN 0 — GROUND
+    ============================== */
+    #screen-0 {
+      justify-content: center;
+    }
+
+    .s0-content {
+      position: absolute;
+      left: 96px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 520px;
+    }
+
+    .s0-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 80px;
+      line-height: 1.05;
+      color: white;
+    }
+
+    .s0-body {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.78;
+      margin-bottom: 14px;
+    }
+
+    .s0-cta-wrap {
+      margin-top: 32px;
+      position: relative;
+      display: inline-block;
+    }
+
+    .s0-tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--yellow);
+      color: #1a1530;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 180ms ease;
+    }
+
+    .s0-cta-wrap:hover .s0-tooltip { opacity: 1; }
+
+    .rise-0 { animation: rise 500ms ease forwards; animation-delay: 0ms; opacity: 0; }
+    .rise-1 { animation: rise 500ms ease forwards; animation-delay: 100ms; opacity: 0; }
+    .rise-2 { animation: rise 500ms ease forwards; animation-delay: 200ms; opacity: 0; }
+    .rise-3 { animation: rise 500ms ease forwards; animation-delay: 300ms; opacity: 0; }
+    .rise-4 { animation: rise 500ms ease forwards; animation-delay: 400ms; opacity: 0; }
+
+    /* ==============================
+       SCREEN 1a — FEELING SELECTOR
+    ============================== */
+    .s1a-content {
+      position: absolute;
+      left: 96px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 540px;
+      width: calc(100% - 192px);
+    }
+
+    .s1a-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .s1a-instruction {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 24px;
+    }
+
+    .feeling-cards { display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px; }
+
+    .feeling-card {
+      background: rgba(44,40,72,0.55);
+      border: 1px solid rgba(127,119,221,0.28);
+      border-radius: 8px;
+      padding: 18px 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 180ms, border-color 180ms, background 180ms;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 20px;
+      color: var(--text-body);
+    }
+    .feeling-card:hover { transform: translateX(3px); border-color: rgba(127,119,221,0.55); }
+    .feeling-card.selected { border-color: var(--rose); background: rgba(44,40,72,0.88); }
+
+    .feeling-marker {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(127,119,221,0.50);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feeling-card.selected .feeling-marker {
+      background: var(--rose);
+      border-color: var(--rose);
+    }
+    .feeling-card.selected .feeling-marker::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: white;
+    }
+
+    .s1a-continue {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 300ms ease;
+      margin-bottom: 20px;
+    }
+    .s1a-continue.visible {
+      animation: rise 400ms ease forwards;
+      pointer-events: auto;
+    }
+
+    .duty-of-care {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: rgba(232,235,244,0.52);
+      max-width: 480px;
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+
+    /* ==============================
+       QUESTION SCREEN (SHARED)
+    ============================== */
+    .question-layout {
+      display: grid;
+      grid-template-columns: 400px 1fr;
+      gap: 0;
+      min-height: 100vh;
+      width: 100%;
+    }
+
+    .q-left {
+      padding: 64px 48px 48px 96px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(127,119,221,0.10);
+      min-height: 100vh;
+    }
+
+    .q-right {
+      padding: 64px 96px 64px 48px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .q-group-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 14px;
+    }
+
+    .q-prev-answers { flex: 0 0 auto; }
+
+    .q-prev-item {
+      margin-bottom: 20px;
+    }
+
+    .q-prev-qlabel {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 6px;
+    }
+
+    .q-prev-answer {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: rgba(232,235,244,0.68);
+      border-left: 2px solid var(--rose);
+      padding-left: 12px;
+      line-height: 1.65;
+    }
+
+    .q-prev-divider {
+      border: none;
+      border-top: 1px solid rgba(127,119,221,0.15);
+      margin: 16px 0;
+    }
+
+    .q-counter {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 12px;
+    }
+
+    .q-question {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 24px;
+      line-height: 1.45;
+      color: white;
+    }
+
+    .q-spacer { flex-grow: 1; min-height: 32px; }
+
+    .q-buttons { display: flex; gap: 12px; margin-top: 24px; flex-wrap: wrap; }
+
+    .q-textarea {
+      flex: 1;
+      min-height: 300px;
+      background: rgba(44,40,72,0.28);
+      border: 1px solid rgba(127,119,221,0.22);
+      border-radius: 8px;
+      padding: 32px 36px;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--text-body);
+      resize: none;
+      outline: none;
+      transition: border-color 200ms, background 200ms;
+      width: 100%;
+    }
+    .q-textarea::placeholder { color: rgba(232,235,244,0.18); }
+    .q-textarea:focus {
+      border-color: rgba(127,119,221,0.45);
+      background: rgba(44,40,72,0.38);
+    }
+
+    .q-wordcount {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: rgba(175,169,236,0.40);
+      text-align: right;
+      margin-top: 10px;
+    }
+
+    .q-option-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 28px;
+      color: var(--rose);
+      margin-bottom: 20px;
+    }
+
+    /* Portrait sidebar (collapsed) */
+    .portrait-sidebar {
+      background: rgba(44,40,72,0.40);
+      border: 1px solid rgba(127,119,221,0.20);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 24px;
+      cursor: pointer;
+      transition: border-color 180ms;
+    }
+    .portrait-sidebar:hover { border-color: rgba(127,119,221,0.40); }
+
+    .portrait-sidebar-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: rgba(232,117,138,0.80);
+      margin-bottom: 4px;
+    }
+
+    .portrait-sidebar-text {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 12px;
+      color: rgba(232,235,244,0.65);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .portrait-sidebar.expanded .portrait-sidebar-text {
+      display: block;
+      -webkit-line-clamp: unset;
+    }
+
+    .portrait-sidebar-item { margin-bottom: 10px; }
+    .portrait-sidebar-item:last-child { margin-bottom: 0; }
+
+    .framing-card {
+      background: rgba(44,40,72,0.40);
+      border: 1px solid rgba(127,119,221,0.20);
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 16px;
+      color: rgba(175,169,236,0.80);
+      line-height: 1.6;
+    }
+
+    /* ==============================
+       SCREEN 2intro
+    ============================== */
+    .s2intro-content {
+      position: absolute;
+      left: 96px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 560px;
+      width: calc(100% - 192px);
+    }
+
+    .s2intro-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 64px;
+      line-height: 1.05;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .s2intro-body {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.78;
+      margin-bottom: 14px;
+    }
+
+    /* ==============================
+       SCREEN 2loading / 3loading
+    ============================== */
+    .loading-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 32px;
+      min-height: 100vh;
+    }
+
+    .loading-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--soft-lilac);
+      animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    .loading-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 20px;
+      color: var(--soft-lilac);
+      animation: fadeIn 600ms ease 400ms forwards;
+      opacity: 0;
+    }
+
+    /* ==============================
+       SCREEN 2portrait
+    ============================== */
+    .s2portrait-wrap {
+      max-width: 820px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      width: 100%;
+    }
+
+    .s2portrait-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 32px;
+    }
+
+    .portrait-card {
+      background: rgba(44,40,72,0.55);
+      border: 1px solid rgba(127,119,221,0.30);
+      border-radius: 12px;
+      padding: 48px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portrait-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+    }
+
+    .portrait-quadrant {
+      padding: 32px;
+      opacity: 0;
+    }
+    .portrait-quadrant.q-tl { border-right: 1px solid rgba(127,119,221,0.15); border-bottom: 1px solid rgba(127,119,221,0.15); }
+    .portrait-quadrant.q-tr { border-bottom: 1px solid rgba(127,119,221,0.15); }
+    .portrait-quadrant.q-bl { border-right: 1px solid rgba(127,119,221,0.15); }
+
+    .portrait-q-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 9px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 12px;
+    }
+
+    .portrait-q-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 18px;
+      color: var(--text-body);
+      line-height: 1.65;
+    }
+
+    .burst-ring {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      animation: burstRing 800ms ease-out forwards;
+    }
+
+    .portrait-easter {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--yellow);
+      text-align: center;
+      margin-top: 32px;
+      animation: fadeIn 600ms ease 1800ms forwards;
+      opacity: 0;
+    }
+
+    .portrait-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+      animation: rise 400ms ease 2000ms forwards;
+      opacity: 0;
+    }
+
+    /* ==============================
+       SCREEN miro
+    ============================== */
+    .miro-layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 64px;
+      padding: 80px 96px;
+      min-height: 100vh;
+      width: 100%;
+      align-items: center;
+    }
+
+    .miro-portrait-mini {
+      background: rgba(44,40,72,0.55);
+      border: 1px solid rgba(127,119,221,0.30);
+      border-radius: 10px;
+      padding: 24px 28px;
+      opacity: 0.65;
+    }
+
+    .miro-portrait-mini .portrait-q-label { font-size: 8px; margin-bottom: 6px; }
+    .miro-portrait-mini .portrait-q-text { font-size: 14px; }
+    .miro-portrait-mini .portrait-quadrant-mini { margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid rgba(127,119,221,0.15); }
+    .miro-portrait-mini .portrait-quadrant-mini:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+    .miro-right-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 48px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .miro-body {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.78;
+      margin-bottom: 14px;
+    }
+
+    .canvas-preview {
+      background: rgba(44,40,72,0.40);
+      border: 1px solid rgba(127,119,221,0.20);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .canvas-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 0;
+      font-family: 'Work Sans', sans-serif;
+      font-size: 14px;
+    }
+    .canvas-row.active { color: var(--rose); font-weight: 500; }
+    .canvas-row.inactive { color: rgba(232,235,244,0.35); font-weight: 300; }
+
+    .canvas-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .canvas-dot.filled { background: var(--rose); }
+    .canvas-dot.empty { border: 1.5px solid rgba(232,235,244,0.35); background: transparent; }
+
+    .miro-buttons { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+
+    .miro-privacy {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 11px;
+      color: rgba(175,169,236,0.45);
+      line-height: 1.6;
+      max-width: 400px;
+    }
+
+    /* ==============================
+       SCREEN 3intro / 4intro / 5intro
+    ============================== */
+    .intro-content {
+      position: absolute;
+      left: 96px;
+      top: 50%;
+      transform: translateY(-50%);
+      max-width: 580px;
+      width: calc(100% - 192px);
+    }
+
+    .intro-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 64px;
+      line-height: 1.05;
+      color: white;
+      margin-bottom: 24px;
+    }
+
+    .intro-body {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.78;
+      margin-bottom: 14px;
+    }
+
+    /* ==============================
+       SCREEN 3options
+    ============================== */
+    .options-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      width: 100%;
+    }
+
+    .options-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 32px;
+    }
+
+    .options-section { margin-bottom: 40px; }
+
+    .options-section-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 16px;
+    }
+
+    .options-cards { display: flex; flex-wrap: wrap; gap: 10px; }
+
+    .option-card {
+      background: rgba(44,40,72,0.50);
+      border: 1px solid rgba(127,119,221,0.22);
+      border-radius: 6px;
+      padding: 16px 20px;
+      min-width: 200px;
+      max-width: 320px;
+      cursor: default;
+    }
+
+    .option-card.selectable { cursor: pointer; transition: border-color 180ms, background 180ms; }
+    .option-card.selectable:hover { border-color: rgba(127,119,221,0.50); }
+    .option-card.selectable.selected { border-color: var(--rose); background: rgba(44,40,72,0.80); }
+
+    .option-card-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      color: var(--text-body);
+      margin-bottom: 4px;
+    }
+
+    .option-card-detail {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 13px;
+      color: rgba(232,235,244,0.60);
+    }
+
+    .options-easter {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-style: italic;
+      font-size: 17px;
+      color: var(--yellow);
+      text-align: center;
+      animation: fadeIn 600ms ease 1800ms forwards;
+      opacity: 0;
+      margin-bottom: 24px;
+    }
+
+    /* ==============================
+       SCREEN 4select
+    ============================== */
+    .select-wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      width: 100%;
+    }
+
+    .select-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 40px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 12px;
+    }
+
+    .select-instruction {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--soft-lilac);
+      margin-bottom: 32px;
+    }
+
+    .select-counter {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 14px;
+      color: var(--soft-lilac);
+      margin-top: 24px;
+      margin-bottom: 16px;
+    }
+
+    .confirm-card {
+      background: rgba(44,40,72,0.50);
+      border: 1px solid rgba(127,119,221,0.22);
+      border-radius: 8px;
+      padding: 20px 28px;
+      text-align: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 17px;
+      color: rgba(175,169,236,0.85);
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 16px auto 0;
+      display: none;
+    }
+
+    /* ==============================
+       SCREEN 4positions
+    ============================== */
+    .positions-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      width: 100%;
+    }
+
+    .positions-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 32px;
+    }
+
+    .position-card {
+      background: rgba(44,40,72,0.55);
+      border: 1px solid rgba(127,119,221,0.28);
+      border-radius: 10px;
+      padding: 32px 36px;
+      margin-bottom: 20px;
+      opacity: 0;
+    }
+
+    .position-option-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2.4px;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 8px;
+    }
+
+    .position-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 22px;
+      color: white;
+      margin-bottom: 20px;
+    }
+
+    .position-section-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 11px;
+      color: rgba(175,169,236,0.80);
+      margin-bottom: 6px;
+    }
+
+    .position-answer {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: var(--text-body);
+      line-height: 1.7;
+      margin-bottom: 20px;
+    }
+    .position-answer:last-child { margin-bottom: 0; }
+
+    .positions-transition {
+      text-align: center;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      color: rgba(175,169,236,0.80);
+      margin-top: 40px;
+      animation: fadeIn 600ms ease 1200ms forwards;
+      opacity: 0;
+    }
+
+    .positions-easter {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 300;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--yellow);
+      text-align: center;
+      margin-top: 20px;
+      animation: fadeIn 600ms ease 1800ms forwards;
+      opacity: 0;
+    }
+
+    .positions-cta {
+      text-align: center;
+      margin-top: 32px;
+      animation: rise 400ms ease 2000ms forwards;
+      opacity: 0;
+    }
+
+    /* ==============================
+       SCREEN 5brief
+    ============================== */
+    .brief-wrap {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 80px 48px;
+      width: 100%;
+    }
+
+    .brief-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 600;
+      font-size: 56px;
+      line-height: 1.1;
+      color: white;
+      margin-bottom: 32px;
+    }
+
+    .brief-card {
+      background: rgba(5,0,15,0.80);
+      border: 1px solid rgba(232,117,138,0.35);
+      border-radius: 10px;
+      padding: 40px 48px;
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    .brief-element {
+      margin-bottom: 28px;
+      opacity: 0;
+    }
+    .brief-element:last-child { margin-bottom: 0; }
+
+    .brief-label {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--rose);
+      margin-bottom: 8px;
+    }
+
+    .brief-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-weight: 400;
+      font-size: 22px;
+      color: white;
+      line-height: 1.5;
+    }
+
+    .brief-text-lg {
+      font-size: 24px;
+    }
+
+    .brief-closing {
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      text-align: center;
+      color: var(--text-body);
+      max-width: 480px;
+      margin: 32px auto 0;
+      line-height: 1.78;
+      animation: fadeIn 600ms ease 1200ms forwards;
+      opacity: 0;
+    }
+
+    .brief-closing p { margin-bottom: 12px; }
+
+    .brief-buttons {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 32px;
+      animation: rise 400ms ease 1800ms forwards;
+      opacity: 0;
+      flex-wrap: wrap;
+    }
+
+    /* ==============================
+       TOAST
+    ============================== */
+    #toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--yellow);
+      color: #1a1530;
+      font-family: 'Work Sans', sans-serif;
+      font-weight: 500;
+      font-size: 13px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 300ms ease;
+      pointer-events: none;
+    }
+    #toast.visible { opacity: 1; }
+
+    /* ==============================
+       MOBILE
+    ============================== */
+    @media (max-width: 767px) {
+      .question-layout { grid-template-columns: 1fr; }
+      .q-left { padding: 40px 24px 24px; min-height: auto; border-right: none; border-bottom: 1px solid rgba(127,119,221,0.10); }
+      .q-right { padding: 24px 24px 60px; min-height: auto; }
+      .s0-content, .s1a-content, .s2intro-content, .intro-content {
+        left: 24px;
+        max-width: none;
+        width: calc(100% - 48px);
+        padding: 40px 0;
+      }
+      .s0-heading { font-size: 52px; }
+      .s2intro-heading, .intro-heading { font-size: 44px; }
+      .s1a-heading { font-size: 38px; }
+      .miro-layout { grid-template-columns: 1fr; padding: 40px 24px; gap: 32px; }
+      .miro-portrait-mini { display: none; }
+      .options-wrap, .select-wrap, .positions-wrap, .brief-wrap, .s2portrait-wrap {
+        padding: 40px 24px;
+      }
+      .portrait-grid { grid-template-columns: 1fr; }
+      .portrait-quadrant.q-tl, .portrait-quadrant.q-bl { border-right: none; }
+      .portrait-quadrant.q-tl, .portrait-quadrant.q-tr { border-bottom: 1px solid rgba(127,119,221,0.15); }
+      .portrait-card { padding: 24px; }
+      .brief-card { padding: 24px 28px; }
+      .s2portrait-heading, .options-heading, .positions-heading, .brief-heading { font-size: 38px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BACKGROUND -->
+  <div id="bg">
+    <div class="nebula-br"></div>
+    <div class="nebula-tl"></div>
+
+    <!-- Stars -->
+    <div class="star" style="width:2px;height:2px;top:8%;left:12%;opacity:0.45;"></div>
+    <div class="star" style="width:3px;height:3px;top:14%;left:34%;opacity:0.30;"></div>
+    <div class="star" style="width:2px;height:2px;top:6%;left:55%;opacity:0.50;"></div>
+    <div class="star" style="width:2px;height:2px;top:20%;left:72%;opacity:0.38;"></div>
+    <div class="star" style="width:3px;height:3px;top:9%;left:82%;opacity:0.28;"></div>
+    <div class="star" style="width:2px;height:2px;top:30%;left:18%;opacity:0.42;"></div>
+    <div class="star" style="width:2px;height:2px;top:25%;left:47%;opacity:0.35;"></div>
+    <div class="star" style="width:3px;height:3px;top:38%;left:63%;opacity:0.50;"></div>
+    <div class="star" style="width:2px;height:2px;top:44%;left:28%;opacity:0.30;"></div>
+    <div class="star" style="width:2px;height:2px;top:52%;left:78%;opacity:0.45;"></div>
+    <div class="star" style="width:3px;height:3px;top:18%;left:92%;opacity:0.32;"></div>
+    <div class="star" style="width:2px;height:2px;top:5%;left:4%;opacity:0.55;"></div>
+    <div class="star" style="width:2px;height:2px;top:35%;left:88%;opacity:0.38;"></div>
+    <div class="star" style="width:3px;height:3px;top:48%;left:6%;opacity:0.28;"></div>
+    <div class="star" style="width:2px;height:2px;top:12%;left:68%;opacity:0.46;"></div>
+    <div class="star" style="width:2px;height:2px;top:22%;left:3%;opacity:0.34;"></div>
+    <div class="star" style="width:3px;height:3px;top:57%;left:42%;opacity:0.25;"></div>
+    <div class="star" style="width:2px;height:2px;top:3%;left:40%;opacity:0.50;"></div>
+    <div class="star" style="width:2px;height:2px;top:16%;left:58%;opacity:0.40;"></div>
+    <div class="star" style="width:3px;height:3px;top:43%;left:53%;opacity:0.33;"></div>
+    <div class="star" style="width:2px;height:2px;top:60%;left:22%;opacity:0.27;"></div>
+    <div class="star" style="width:2px;height:2px;top:28%;left:76%;opacity:0.44;"></div>
+    <div class="star" style="width:3px;height:3px;top:11%;left:22%;opacity:0.36;"></div>
+    <div class="star" style="width:2px;height:2px;top:32%;left:44%;opacity:0.42;"></div>
+
+    <!-- Moon -->
+    <svg class="moon" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="25" cy="25" r="24" fill="rgba(200,196,216,0.42)" />
+      <circle cx="25" cy="25" r="18" fill="rgba(228,226,240,0.80)" />
+      <circle cx="17" cy="25" r="18" fill="rgba(26,21,48,0.94)" />
+    </svg>
+
+    <!-- Sparkle clusters -->
+    <div class="sparkle-cluster" style="top:18%;left:38%;">
+      <div class="sparkle-dot" style="background:var(--gold-spark);opacity:0.65;top:0;left:0;"></div>
+      <div class="sparkle-dot" style="background:var(--soft-lilac);opacity:0.50;top:7px;left:8px;"></div>
+      <div class="sparkle-dot" style="background:var(--gold-spark);opacity:0.45;top:2px;left:14px;"></div>
+    </div>
+    <div class="sparkle-cluster" style="top:55%;left:70%;">
+      <div class="sparkle-dot" style="background:var(--soft-lilac);opacity:0.55;top:0;left:0;"></div>
+      <div class="sparkle-dot" style="background:var(--gold-spark);opacity:0.45;top:8px;left:6px;"></div>
+      <div class="sparkle-dot" style="background:var(--soft-lilac);opacity:0.40;top:1px;left:12px;"></div>
+    </div>
+    <div class="sparkle-cluster" style="top:72%;left:15%;">
+      <div class="sparkle-dot" style="background:var(--gold-spark);opacity:0.50;top:0;left:0;"></div>
+      <div class="sparkle-dot" style="background:var(--soft-lilac);opacity:0.40;top:6px;left:9px;"></div>
+      <div class="sparkle-dot" style="background:var(--gold-spark);opacity:0.35;top:2px;left:16px;"></div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div id="progress-bar"></div>
+  <div id="part-label"></div>
+
+  <!-- TOAST -->
+  <div id="toast"></div>
+
+  <!-- APP -->
+  <div id="app">
+
+    <!-- ==============================
+         SCREEN 0 — GROUND
+    ============================== -->
+    <div class="screen" id="screen-0">
+      <div class="s0-content">
+        <div class="supertitle rise-0">A thinking tool for uncertain times</div>
+        <hr class="rose-rule rise-1">
+        <h1 class="s0-heading rise-2">Don't Panic.</h1>
+        <div class="rise-3">
+          <p class="s0-body">Good advice. The best advice, arguably. It worked for Arthur Dent, and he lost his house and the entire planet in a single Thursday morning.</p>
+          <p class="s0-body">Something has shifted at work. You're not sure yet whether it's a blip or the beginning of something bigger.</p>
+          <p class="s0-body">This tool won't tell you what to do. It will help you think clearly about where you are, what matters to you, and what your options actually look like. It goes at your pace. Nothing you write here is collected, stored, or seen by anyone but you.</p>
+          <p class="s0-body">Find somewhere quiet. You don't need to be brave. Just honest with yourself. You're already halfway there.</p>
+        </div>
+        <div class="s0-cta-wrap rise-4">
+          <button class="btn-rose" id="btn-start">Right then. Let's go.</button>
+          <div class="s0-tooltip">You hoopy frood.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 1a — FEELING SELECTOR
+    ============================== -->
+    <div class="screen" id="screen-1a">
+      <div class="s1a-content">
+        <div class="supertitle">What's actually happening with you</div>
+        <hr class="rose-rule">
+        <h2 class="s1a-heading">How are you feeling right now?</h2>
+        <p class="s1a-instruction">Pick what fits. More than one is fine.</p>
+        <div class="feeling-cards" id="feeling-cards">
+          <div class="feeling-card" data-key="not-okay">
+            <div class="feeling-marker"></div>
+            I'm not okay right now
+          </div>
+          <div class="feeling-card" data-key="holding">
+            <div class="feeling-marker"></div>
+            I'm holding it together, but only just
+          </div>
+          <div class="feeling-card" data-key="okay">
+            <div class="feeling-marker"></div>
+            I'm okay, I just want to think this through
+          </div>
+        </div>
+        <div class="s1a-continue" id="s1a-continue">
+          <button class="btn-rose" id="btn-1a-continue">Continue</button>
+        </div>
+        <p class="duty-of-care">If things feel heavier than this tool can hold right now, that's worth knowing. Beyond Blue (1300 22 4636) and Lifeline (13 11 14) are both there, any time.</p>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SHARED QUESTION SCREEN — Part 1
+    ============================== -->
+    <div class="screen" id="screen-question-1">
+      <div class="question-layout">
+        <div class="q-left" id="q1-left">
+          <!-- filled dynamically -->
+        </div>
+        <div class="q-right" id="q1-right">
+          <textarea class="q-textarea" id="q1-textarea" placeholder="Take your time with this one."></textarea>
+          <div class="q-wordcount" id="q1-wordcount">Start writing when you're ready.</div>
+          <p class="duty-of-care" style="margin-top:20px;">If things feel heavier than this tool can hold right now, that's worth knowing. Beyond Blue (1300 22 4636) and Lifeline (13 11 14) are both there, any time.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 2intro
+    ============================== -->
+    <div class="screen" id="screen-2intro">
+      <div class="s2intro-content">
+        <div class="supertitle">What you know about yourself</div>
+        <hr class="rose-rule">
+        <h2 class="s2intro-heading">Let's remember who you are.</h2>
+        <p class="s2intro-body">Not who your current employer thinks you are. Not who you've had to be to get through the last few months. Who you actually are: the professional your team sees, that your colleagues rely on, that does genuinely good work.</p>
+        <p class="s2intro-body">That person is still here. We just need to make sure it's them doing the thinking, not whoever you've had to be lately.</p>
+        <p class="s2intro-body">These questions aren't about the situation. They're about you. Take your time.</p>
+        <button class="btn-rose" id="btn-2intro">I'm ready</button>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SHARED QUESTION SCREEN — Part 2
+    ============================== -->
+    <div class="screen" id="screen-question-2">
+      <div class="question-layout">
+        <div class="q-left" id="q2-left">
+          <!-- filled dynamically -->
+        </div>
+        <div class="q-right" id="q2-right">
+          <textarea class="q-textarea" id="q2-textarea" placeholder="Take your time with this one."></textarea>
+          <div class="q-wordcount" id="q2-wordcount">Start writing when you're ready.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 2loading
+    ============================== -->
+    <div class="screen" id="screen-2loading">
+      <div class="loading-screen">
+        <div class="loading-dot"></div>
+        <div class="loading-text" id="loading-2-text">There you are.</div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 2portrait
+    ============================== -->
+    <div class="screen" id="screen-2portrait">
+      <div class="s2portrait-wrap">
+        <div class="supertitle">What you know about yourself</div>
+        <hr class="rose-rule">
+        <h2 class="s2portrait-heading">There you are.</h2>
+        <div class="portrait-card" id="portrait-card">
+          <div class="portrait-grid">
+            <div class="portrait-quadrant q-tl" id="pq-tl">
+              <div class="portrait-q-label">I do my best work when</div>
+              <div class="portrait-q-text" id="portrait-bestWork"></div>
+            </div>
+            <div class="portrait-quadrant q-tr" id="pq-tr">
+              <div class="portrait-q-label">What I won't compromise on</div>
+              <div class="portrait-q-text" id="portrait-nonNegotiable"></div>
+            </div>
+            <div class="portrait-quadrant q-bl" id="pq-bl">
+              <div class="portrait-q-label">Where I'm headed</div>
+              <div class="portrait-q-text" id="portrait-headed"></div>
+            </div>
+            <div class="portrait-quadrant q-br" id="pq-br">
+              <div class="portrait-q-label">What I don't want to leave untried</div>
+              <div class="portrait-q-text" id="portrait-untried"></div>
+            </div>
+          </div>
+        </div>
+        <div class="portrait-easter">There you are.</div>
+        <div class="portrait-buttons">
+          <button class="btn-rose" id="btn-portrait-continue">Continue to Part 3</button>
+          <button class="btn-ghost" id="btn-copy-portrait">Copy portrait</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN miro
+    ============================== -->
+    <div class="screen" id="screen-miro">
+      <div class="miro-layout">
+        <div class="miro-portrait-mini" id="miro-portrait-mini">
+          <div class="portrait-quadrant-mini">
+            <div class="portrait-q-label">I do my best work when</div>
+            <div class="portrait-q-text" id="miro-bestWork" style="font-size:14px;font-family:'Cormorant Garamond',serif;color:var(--text-body);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></div>
+          </div>
+          <div class="portrait-quadrant-mini">
+            <div class="portrait-q-label">What I won't compromise on</div>
+            <div class="portrait-q-text" id="miro-nonNeg" style="font-size:14px;font-family:'Cormorant Garamond',serif;color:var(--text-body);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></div>
+          </div>
+          <div class="portrait-quadrant-mini">
+            <div class="portrait-q-label">Where I'm headed</div>
+            <div class="portrait-q-text" id="miro-headed" style="font-size:14px;font-family:'Cormorant Garamond',serif;color:var(--text-body);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></div>
+          </div>
+          <div class="portrait-quadrant-mini">
+            <div class="portrait-q-label">What I don't want to leave untried</div>
+            <div class="portrait-q-text" id="miro-untried" style="font-size:14px;font-family:'Cormorant Garamond',serif;color:var(--text-body);line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"></div>
+          </div>
+        </div>
+        <div class="miro-right">
+          <div class="supertitle">Your canvas is waiting</div>
+          <hr class="rose-rule" style="max-width:320px;">
+          <h2 class="miro-right-heading">Let's give it somewhere to live.</h2>
+          <p class="miro-body">Your portrait is ready. Connect your Miro account and it will be waiting for you there, along with everything you build from here.</p>
+          <p class="miro-body">The canvas is yours. It lives in your account, not ours. You can return to it whenever the situation shifts.</p>
+          <div class="canvas-preview">
+            <div class="canvas-row active"><div class="canvas-dot filled"></div>Your portrait</div>
+            <div class="canvas-row inactive"><div class="canvas-dot empty"></div>Options map</div>
+            <div class="canvas-row inactive"><div class="canvas-dot empty"></div>Three positions</div>
+            <div class="canvas-row inactive"><div class="canvas-dot empty"></div>Action brief</div>
+          </div>
+          <div class="miro-buttons">
+            <button class="btn-rose" id="btn-connect-miro">Connect Miro</button>
+            <button class="btn-ghost" id="btn-skip-miro">Continue without Miro</button>
+          </div>
+          <p class="miro-privacy">Connecting Miro only creates a new board in your account. We don't read your existing boards or store your data.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 3intro
+    ============================== -->
+    <div class="screen" id="screen-3intro">
+      <div class="intro-content">
+        <div class="supertitle">All of it. Every option.</div>
+        <hr class="rose-rule">
+        <h2 class="intro-heading">What could you do?</h2>
+        <p class="intro-body">Not what you should do. Not what's realistic. Not what people would think. All of it.</p>
+        <p class="intro-body">This is the one part of the process where the rules are suspended. Nothing here is a commitment. You're just thinking, and thinking out loud is exactly where good options come from.</p>
+        <p class="intro-body">We're going to move through four lenses. For each one, say everything that comes up: the obvious things and the unlikely ones, the safe bets and the ones that feel a bit much. Especially those.</p>
+        <button class="btn-rose" id="btn-3intro">Let's go</button>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SHARED QUESTION SCREEN — Part 3
+    ============================== -->
+    <div class="screen" id="screen-question-3">
+      <div class="question-layout">
+        <div class="q-left" id="q3-left">
+          <!-- filled dynamically -->
+        </div>
+        <div class="q-right" id="q3-right">
+          <textarea class="q-textarea" id="q3-textarea" placeholder="Take your time with this one."></textarea>
+          <div class="q-wordcount" id="q3-wordcount">Start writing when you're ready.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 3loading
+    ============================== -->
+    <div class="screen" id="screen-3loading">
+      <div class="loading-screen">
+        <div class="loading-dot"></div>
+        <div class="loading-text">Mapping your options.</div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 3options
+    ============================== -->
+    <div class="screen" id="screen-3options">
+      <div class="options-wrap">
+        <div class="supertitle">All of it. Every option.</div>
+        <hr class="rose-rule">
+        <h2 class="options-heading">Your options map.</h2>
+        <div id="options-sections"></div>
+        <div class="options-easter">Forty-two probably isn't on the list. But something useful is.</div>
+        <div style="text-align:center;margin-top:48px;">
+          <button class="btn-rose" id="btn-choose-three">Choose three to explore</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 4intro
+    ============================== -->
+    <div class="screen" id="screen-4intro">
+      <div class="intro-content">
+        <div class="supertitle">Making the options real</div>
+        <hr class="rose-rule">
+        <h2 class="intro-heading">Let's look at three of these properly.</h2>
+        <p class="intro-body">You've done the expansive thinking. That part is finished.</p>
+        <p class="intro-body">This is different. It's quieter, more practical. You're not generating anything new. You're just taking three of the options you've already named and thinking them through carefully enough that they feel solid. Prepared. Ready to pick up when you need them.</p>
+        <p class="intro-body">You don't have to commit to any of them. You're building positions, not making decisions.</p>
+        <button class="btn-rose" id="btn-4intro">Choose my three</button>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 4select
+    ============================== -->
+    <div class="screen" id="screen-4select">
+      <div class="select-wrap">
+        <h2 class="select-heading">Choose three options to explore.</h2>
+        <p class="select-instruction">Select exactly three. These become your prepared positions.</p>
+        <div id="select-sections"></div>
+        <div class="select-counter" id="select-counter">0 of 3 selected</div>
+        <button class="btn-rose" id="btn-confirm-three" disabled>These are my three</button>
+        <div class="confirm-card" id="confirm-card">Good. Let's look at each one in turn. Take your time with these. There's no rush and no wrong answers.</div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SHARED QUESTION SCREEN — Part 4
+    ============================== -->
+    <div class="screen" id="screen-question-4">
+      <div class="question-layout">
+        <div class="q-left" id="q4-left">
+          <!-- filled dynamically -->
+        </div>
+        <div class="q-right" id="q4-right">
+          <textarea class="q-textarea" id="q4-textarea" placeholder="Take your time with this one."></textarea>
+          <div class="q-wordcount" id="q4-wordcount">Start writing when you're ready.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 4positions
+    ============================== -->
+    <div class="screen" id="screen-4positions">
+      <div class="positions-wrap">
+        <div class="supertitle">Making the options real</div>
+        <hr class="rose-rule">
+        <h2 class="positions-heading">Three prepared positions.</h2>
+        <div id="position-cards"></div>
+        <p class="positions-transition">Three prepared positions. That's what you've built here. None of them are promises. All of them are real.</p>
+        <p class="positions-easter">So long, and thanks for all the options.</p>
+        <div class="positions-cta">
+          <button class="btn-rose" id="btn-4positions">One more step</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 5intro
+    ============================== -->
+    <div class="screen" id="screen-5intro">
+      <div class="intro-content" style="max-width:560px;">
+        <div class="supertitle">One move. That's all.</div>
+        <hr class="rose-rule">
+        <h2 class="intro-heading">What are you going to do first?</h2>
+        <p class="intro-body">You've done the hard work. This is the last part, and it's the shortest.</p>
+        <p class="intro-body">This isn't about having everything figured out. It's about leaving here with one clear move: something concrete, something yours, something you've actually decided rather than just considered.</p>
+        <button class="btn-rose" id="btn-5intro">I'm ready</button>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SHARED QUESTION SCREEN — Part 5
+    ============================== -->
+    <div class="screen" id="screen-question-5">
+      <div class="question-layout">
+        <div class="q-left" id="q5-left">
+          <!-- filled dynamically -->
+        </div>
+        <div class="q-right" id="q5-right">
+          <textarea class="q-textarea" id="q5-textarea" placeholder="Take your time with this one."></textarea>
+          <div class="q-wordcount" id="q5-wordcount">Start writing when you're ready.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==============================
+         SCREEN 5brief
+    ============================== -->
+    <div class="screen" id="screen-5brief">
+      <div class="brief-wrap">
+        <div class="supertitle">One move. That's all.</div>
+        <hr class="rose-rule">
+        <h2 class="brief-heading">Your action brief.</h2>
+        <div class="brief-card">
+          <div class="brief-element" id="brief-el-1">
+            <div class="brief-label">My first move</div>
+            <div class="brief-text" id="brief-move"></div>
+          </div>
+          <div class="brief-element" id="brief-el-2">
+            <div class="brief-label">By</div>
+            <div class="brief-text" id="brief-by"></div>
+          </div>
+          <div class="brief-element" id="brief-el-3">
+            <div class="brief-label">Because</div>
+            <div class="brief-text brief-text-lg" id="brief-because"></div>
+          </div>
+        </div>
+        <div class="brief-closing">
+          <p>That's it. That's the whole thing.</p>
+          <p>Your first move doesn't have to be a work move. It might be rest, or time with people who restore you, or simply deciding that this week you're not going to think about any of it. Those are real actions. They count.</p>
+          <p>Nothing you wrote here was collected, stored, or seen by anyone but you. It never left your hands.</p>
+        </div>
+        <div class="brief-buttons">
+          <button class="btn-rose" id="btn-canvas">Take me to my canvas.</button>
+          <button class="btn-ghost" id="btn-copy-brief">Copy my action brief</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /app -->
+
+  <script>
+  // ============================================================
+  // STATE
+  // ============================================================
+  const state = {
+    part: 0,
+    currentScreen: 'screen-0',
+    miroToken: null,
+    boardId: null,
+    zone1: { selections: [], answers: {} },
+    zone2: { answers: {} },
+    zone3: { answers: {} },
+    zone4: { selections: [], answers: {} },
+    zone5: { answers: {} },
+    portrait: null,
+    optionsMap: null
+  };
+
+  function saveState() {
+    try {
+      sessionStorage.setItem('dont_panic_state', JSON.stringify(state));
+    } catch(e) {}
+  }
+
+  function loadState() {
+    try {
+      const saved = sessionStorage.getItem('dont_panic_state');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        Object.assign(state, parsed);
+      }
+    } catch(e) {}
+  }
+
+  // ============================================================
+  // PROGRESS & PART LABEL
+  // ============================================================
+  const screenProgress = {
+    'screen-0': 0,
+    'screen-1a': 15,
+    'screen-question-1': 20,
+    'screen-2intro': 30,
+    'screen-question-2': 35,
+    'screen-2loading': 40,
+    'screen-2portrait': 45,
+    'screen-miro': 48,
+    'screen-3intro': 50,
+    'screen-question-3': 55,
+    'screen-3loading': 62,
+    'screen-3options': 65,
+    'screen-4intro': 70,
+    'screen-4select': 72,
+    'screen-question-4': 78,
+    'screen-4positions': 85,
+    'screen-5intro': 90,
+    'screen-question-5': 93,
+    'screen-5brief': 100
+  };
+
+  const screenPartLabels = {
+    'screen-1a': 'Part 1 · Empathise',
+    'screen-question-1': 'Part 1 · Empathise',
+    'screen-2intro': 'Part 2 · Define',
+    'screen-question-2': 'Part 2 · Define',
+    'screen-2loading': 'Part 2 · Define',
+    'screen-2portrait': 'Part 2 · Define',
+    'screen-miro': 'Part 2 · Define',
+    'screen-3intro': 'Part 3 · Ideate',
+    'screen-question-3': 'Part 3 · Ideate',
+    'screen-3loading': 'Part 3 · Ideate',
+    'screen-3options': 'Part 3 · Ideate',
+    'screen-4intro': 'Part 4 · Prototype',
+    'screen-4select': 'Part 4 · Prototype',
+    'screen-question-4': 'Part 4 · Prototype',
+    'screen-4positions': 'Part 4 · Prototype',
+    'screen-5intro': 'Part 5 · Test',
+    'screen-question-5': 'Part 5 · Test',
+    'screen-5brief': 'Part 5 · Test'
+  };
+
+  function updateProgressBar(id) {
+    const bar = document.getElementById('progress-bar');
+    const pct = screenProgress[id] || 0;
+    if (pct === 0) {
+      bar.style.width = '0%';
+      bar.style.display = 'none';
+    } else {
+      bar.style.display = 'block';
+      bar.style.width = pct + '%';
+    }
+  }
+
+  function updatePartLabel(id) {
+    const label = document.getElementById('part-label');
+    const text = screenPartLabels[id];
+    if (text) {
+      label.textContent = text;
+      label.style.opacity = '1';
+    } else {
+      label.style.opacity = '0';
+    }
+  }
+
+  // ============================================================
+  // SCREEN NAVIGATION
+  // ============================================================
+  function showScreen(id) {
+    const current = document.querySelector('.screen.active');
+    if (current) {
+      current.style.opacity = '0';
+      setTimeout(() => {
+        current.classList.remove('active');
+        current.style.display = 'none';
+        activateScreen(id);
+      }, 300);
+    } else {
+      activateScreen(id);
+    }
+  }
+
+  function activateScreen(id) {
+    const next = document.getElementById(id);
+    if (!next) return;
+    next.style.display = 'flex';
+    next.classList.add('active');
+    next.style.opacity = '0';
+    next.style.transition = '';
+    // Force reflow
+    void next.offsetWidth;
+    next.style.transition = 'opacity 500ms ease';
+    next.style.opacity = '1';
+    state.currentScreen = id;
+    saveState();
+    updateProgressBar(id);
+    updatePartLabel(id);
+    onScreenMount(id);
+  }
+
+  // ============================================================
+  // SCREEN MOUNT HANDLERS
+  // ============================================================
+  function onScreenMount(id) {
+    if (id === 'screen-2loading') mountScreen2Loading();
+    if (id === 'screen-2portrait') mountScreen2Portrait();
+    if (id === 'screen-miro') mountScreenMiro();
+    if (id === 'screen-3loading') mountScreen3Loading();
+    if (id === 'screen-3options') mountScreen3Options();
+    if (id === 'screen-4select') mountScreen4Select();
+    if (id === 'screen-4positions') mountScreen4Positions();
+    if (id === 'screen-5brief') mountScreen5Brief();
+  }
+
+  // ============================================================
+  // QUESTION DATA
+  // ============================================================
+  const zone1Questions = {
+    'not-okay': [
+      { label: 'Question 1', text: "What's going on? Just say it however it comes out." },
+      { label: 'Question 2', text: 'How long have you been carrying this?' },
+      { label: 'Question 3', text: 'What would help most right now, even just a little?' }
+    ],
+    'holding': [
+      { label: 'Question 1', text: 'What does holding it together cost you on a typical day?' },
+      { label: 'Question 2', text: "What's the thing that's taking the most out of you right now?" },
+      { label: 'Question 3', text: 'What would it feel like to put it down, even just for an hour?' }
+    ],
+    'okay': [
+      { label: 'Question 1', text: "What's brought you here today? Something specific, or just a sense that it's time?" },
+      { label: 'Question 2', text: 'What do you most want to have figured out by the time you\'re done?' },
+      { label: 'Question 3', text: "What's the thing you've been avoiding thinking about properly?" }
+    ]
+  };
+
+  const zone1GroupLabels = {
+    'not-okay': "I'm not okay right now",
+    'holding': "I'm holding it together",
+    'okay': "I'm okay, thinking this through"
+  };
+
+  const zone2Groups = [
+    {
+      label: 'Who you were',
+      framing: 'Think about your work before things got complicated. This isn\'t nostalgia. It\'s evidence.',
+      questions: [
+        { key: 'q1', label: 'Question 1 of 7', text: "What kind of work made you lose track of time? Not the job title. The actual work." },
+        { key: 'q2', label: 'Question 2 of 7', text: "Tell me about something you made or did that you're still quietly proud of. What made it good?" }
+      ]
+    },
+    {
+      label: 'What you\'re made of',
+      framing: "These are about what matters to you, not what you're supposed to say matters to you.",
+      questions: [
+        { key: 'q3', label: 'Question 3 of 7', text: "What's the one thing you won't budge on at work, even when it would be easier to just let it go?" },
+        { key: 'q4', label: 'Question 4 of 7', text: "What does a good day at work actually feel like? What's in the room, who's there, how does it run?" },
+        { key: 'q5', label: 'Question 5 of 7', text: "What's the thing you'd kick yourself for never having tried?" }
+      ]
+    },
+    {
+      label: 'Where you\'re headed',
+      framing: "Not a five-year plan. Just a direction. Vague is fine. Point at something.",
+      questions: [
+        { key: 'q6', label: 'Question 6 of 7', text: "If this all resolved tomorrow and you could point yourself anywhere professionally, where would you go?" },
+        { key: 'q7', label: 'Question 7 of 7', text: "Twelve months from now, what does good look like? Not perfect. Just genuinely good." }
+      ]
+    }
+  ];
+
+  function buildZone3Groups() {
+    const nonNeg = state.portrait ? state.portrait.nonNegotiable : 'your values';
+    const headed = state.portrait ? state.portrait.headed : 'your direction';
+    const untried = state.portrait ? state.portrait.untried : "what you haven't tried";
+
+    return [
+      {
+        label: 'What you could do right now',
+        framing: `You said you won't compromise on: "${nonNeg}". Holding that, what moves are available to you right now?`,
+        questions: [
+          { key: 'z3q1', label: 'Question 1 of 12', text: "What's the most obvious move? The one you've thought of a hundred times already. Put it down." },
+          { key: 'z3q2', label: 'Question 2 of 12', text: "What's the option you keep dismissing before you've properly thought it through?" },
+          { key: 'z3q3', label: 'Question 3 of 12', text: "What would you do if you had six months of runway and no immediate pressure?" }
+        ]
+      },
+      {
+        label: 'What you could build towards',
+        framing: `You said you're pointed towards: "${headed}". What options, near or far, move you in that direction?`,
+        questions: [
+          { key: 'z3q4', label: 'Question 4 of 12', text: "What's one step, however small, that moves you closer to what you described?" },
+          { key: 'z3q5', label: 'Question 5 of 12', text: "What would you need to make that direction more possible?" },
+          { key: 'z3q6', label: 'Question 6 of 12', text: "What's the version of this that feels slightly too ambitious? Put it down anyway." }
+        ]
+      },
+      {
+        label: "What you haven't let yourself think about",
+        framing: `You said you don't want to leave this untried: "${untried}". This is the space to think about that properly.`,
+        questions: [
+          { key: 'z3q7', label: 'Question 7 of 12', text: "If you knew it would work out, what would you do?" },
+          { key: 'z3q8', label: 'Question 8 of 12', text: "What's the option that would require the most courage? Just name it. You don't have to do it." },
+          { key: 'z3q9', label: 'Question 9 of 12', text: "What's the thing you've quietly wanted to try but kept finding reasons not to?" }
+        ]
+      },
+      {
+        label: 'What you could do with your current situation',
+        framing: "Where you are right now isn't necessarily where you're going. But there may be things worth extracting from it before you move on.",
+        questions: [
+          { key: 'z3q10', label: 'Question 10 of 12', text: "What could you get from your current situation that would make your next move easier? Skills, experience, references, financial runway." },
+          { key: 'z3q11', label: 'Question 11 of 12', text: "Is there anything you'd want to try to change or influence from inside, and do you have the energy for it right now?" },
+          { key: 'z3q12', label: 'Question 12 of 12', text: "What would staying look like if it were entirely on your terms? What would need to be different for that to be possible?" }
+        ]
+      }
+    ];
+  }
+
+  const zone4Questions = (option, letter) => [
+    {
+      key: `z4${letter}q1`,
+      label: `Option ${letter} · Question 1 of 2`,
+      text: "What would this actually ask of you? Think about time, energy, money, relationships, and what it would take emotionally."
+    },
+    {
+      key: `z4${letter}q2`,
+      label: `Option ${letter} · Question 2 of 2`,
+      text: "What's the first move? Not the whole plan. Just the first thing you'd actually do."
+    }
+  ];
+
+  const zone5Questions = [
+    {
+      key: 'z5q1',
+      label: 'The move',
+      groupLabel: 'One move. That\'s all.',
+      text: "Looking at your three prepared positions, what's your first move? It doesn't have to come from your favourite option, and it doesn't have to be a work move. Rest, recovery, or time away from all of this is a legitimate first move. It just has to be real and doable."
+    },
+    {
+      key: 'z5q2',
+      label: 'The timeframe',
+      groupLabel: 'One move. That\'s all.',
+      text: "When will you do it? Give it a shape: a day, a week, a month. Vague is fine. Just point at something."
+    },
+    {
+      key: 'z5q3',
+      label: 'The why',
+      groupLabel: 'One move. That\'s all.',
+      text: "In one sentence: why this move, now? Not a justification. Just the truth of it, in your own words."
+    }
+  ];
+
+  // ============================================================
+  // QUESTION QUEUES
+  // ============================================================
+  let q1Queue = []; // [{key, label, text, groupKey, groupLabel}]
+  let q1Index = 0;
+
+  let q2Queue = []; // [{key, label, text, groupLabel, framing, isFirst}]
+  let q2Index = 0;
+
+  let q3Queue = [];
+  let q3Index = 0;
+
+  let q4Queue = [];
+  let q4Index = 0;
+
+  let q5Queue = [];
+  let q5Index = 0;
+
+  function buildQ1Queue() {
+    q1Queue = [];
+    state.zone1.selections.forEach(sel => {
+      const qs = zone1Questions[sel] || [];
+      qs.forEach(q => {
+        q1Queue.push({ key: `${sel}_${q.label}`, label: q.label, text: q.text, groupKey: sel, groupLabel: zone1GroupLabels[sel] });
+      });
+    });
+    q1Index = 0;
+  }
+
+  function buildQ2Queue() {
+    q2Queue = [];
+    zone2Groups.forEach(group => {
+      group.questions.forEach((q, i) => {
+        q2Queue.push({ key: q.key, label: q.label, text: q.text, groupLabel: group.label, framing: i === 0 ? group.framing : null });
+      });
+    });
+    q2Index = 0;
+  }
+
+  function buildQ3Queue() {
+    q3Queue = [];
+    const groups = buildZone3Groups();
+    groups.forEach(group => {
+      group.questions.forEach((q, i) => {
+        q3Queue.push({ key: q.key, label: q.label, text: q.text, groupLabel: group.label, framing: i === 0 ? group.framing : null });
+      });
+    });
+    q3Index = 0;
+  }
+
+  function buildQ4Queue() {
+    q4Queue = [];
+    const letters = ['A', 'B', 'C'];
+    state.zone4.selections.forEach((sel, idx) => {
+      const letter = letters[idx];
+      const qs = zone4Questions(sel, letter);
+      qs.forEach(q => {
+        q4Queue.push({ key: q.key, label: q.label, text: q.text, optionLetter: letter, optionLabel: sel.label });
+      });
+    });
+    q4Index = 0;
+  }
+
+  function buildQ5Queue() {
+    q5Queue = zone5Questions.map(q => ({ ...q }));
+    q5Index = 0;
+  }
+
+  // ============================================================
+  // QUESTION SCREEN RENDERING
+  // ============================================================
+  function renderQuestionScreen(part, queue, index) {
+    const screenId = `screen-question-${part}`;
+    const leftId = `q${part}-left`;
+    const textareaId = `q${part}-textarea`;
+    const wordcountId = `q${part}-wordcount`;
+
+    const q = queue[index];
+    if (!q) return;
+
+    const leftEl = document.getElementById(leftId);
+    const textarea = document.getElementById(textareaId);
+    const wordcount = document.getElementById(wordcountId);
+
+    // Build previous answers for current group
+    const prevInGroup = [];
+    for (let i = 0; i < index; i++) {
+      if (queue[i].groupLabel === q.groupLabel) {
+        prevInGroup.push({ label: queue[i].label, answer: getAnswerForKey(part, queue[i].key) });
+      }
+    }
+
+    // Build left content
+    let leftHTML = '';
+
+    // Portrait sidebar for part 3
+    if (part === 3 && state.portrait) {
+      leftHTML += buildPortraitSidebar();
+    }
+
+    // Option heading for part 4
+    if (part === 4 && q.optionLetter) {
+      leftHTML += `<div class="q-option-heading">Option ${q.optionLetter}: ${q.optionLabel || ''}</div>`;
+    }
+
+    leftHTML += `<div class="q-group-label">${escapeHtml(q.groupLabel || '')}</div>`;
+    leftHTML += `<hr class="rose-rule" style="margin:12px 0 20px;">`;
+
+    // Framing card
+    if (q.framing) {
+      leftHTML += `<div class="framing-card">${escapeHtml(q.framing)}</div>`;
+    }
+
+    // Previous answers
+    if (prevInGroup.length > 0) {
+      leftHTML += `<div class="q-prev-answers">`;
+      prevInGroup.forEach(prev => {
+        leftHTML += `
+          <div class="q-prev-item">
+            <div class="q-prev-qlabel">${escapeHtml(prev.label)}</div>
+            <div class="q-prev-answer">${escapeHtml(prev.answer || '(skipped)')}</div>
+          </div>
+          <hr class="q-prev-divider">
+        `;
+      });
+      leftHTML += `</div>`;
+    }
+
+    leftHTML += `<div class="q-counter">${escapeHtml(q.label || '')}</div>`;
+    leftHTML += `<div class="q-question">${escapeHtml(q.text)}</div>`;
+    leftHTML += `<div class="q-spacer"></div>`;
+    leftHTML += `<div class="q-buttons">
+      <button class="btn-rose" id="q${part}-continue-btn">Continue</button>
+      <button class="btn-ghost" id="q${part}-skip-btn">Skip</button>
+    </div>`;
+
+    leftEl.innerHTML = leftHTML;
+
+    // Re-attach portrait sidebar toggle
+    if (part === 3) {
+      const sidebar = leftEl.querySelector('.portrait-sidebar');
+      if (sidebar) {
+        sidebar.addEventListener('click', () => sidebar.classList.toggle('expanded'));
+      }
+    }
+
+    // Restore answer if exists
+    const savedAnswer = getAnswerForKey(part, q.key);
+    textarea.value = savedAnswer || '';
+    updateWordCount(wordcountId, textarea.value);
+
+    // Textarea word count
+    textarea.oninput = () => updateWordCount(wordcountId, textarea.value);
+
+    // Continue
+    document.getElementById(`q${part}-continue-btn`).onclick = () => {
+      const answer = textarea.value.trim();
+      storeAnswer(part, q.key, answer);
+      advanceQuestion(part, queue, index + 1);
+    };
+
+    // Skip
+    document.getElementById(`q${part}-skip-btn`).onclick = () => {
+      storeAnswer(part, q.key, '');
+      advanceQuestion(part, queue, index + 1);
+    };
+  }
+
+  function buildPortraitSidebar() {
+    if (!state.portrait) return '';
+    const p = state.portrait;
+    const truncate = (s, n) => s && s.length > n ? s.substring(0, n) + '...' : (s || '');
+    return `
+      <div class="portrait-sidebar" id="portrait-sidebar-toggle">
+        <div class="portrait-sidebar-item">
+          <div class="portrait-sidebar-label">Best work when</div>
+          <div class="portrait-sidebar-text">${escapeHtml(truncate(p.bestWork, 60))}</div>
+        </div>
+        <div class="portrait-sidebar-item">
+          <div class="portrait-sidebar-label">Won't compromise on</div>
+          <div class="portrait-sidebar-text">${escapeHtml(truncate(p.nonNegotiable, 60))}</div>
+        </div>
+        <div class="portrait-sidebar-item">
+          <div class="portrait-sidebar-label">Headed towards</div>
+          <div class="portrait-sidebar-text">${escapeHtml(truncate(p.headed, 60))}</div>
+        </div>
+        <div class="portrait-sidebar-item">
+          <div class="portrait-sidebar-label">Don't want to leave untried</div>
+          <div class="portrait-sidebar-text">${escapeHtml(truncate(p.untried, 60))}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function advanceQuestion(part, queue, nextIndex) {
+    if (nextIndex >= queue.length) {
+      onPartComplete(part);
+    } else {
+      if (part === 1) { q1Index = nextIndex; renderQuestionScreen(1, queue, nextIndex); }
+      else if (part === 2) { q2Index = nextIndex; renderQuestionScreen(2, queue, nextIndex); }
+      else if (part === 3) { q3Index = nextIndex; renderQuestionScreen(3, queue, nextIndex); }
+      else if (part === 4) { q4Index = nextIndex; renderQuestionScreen(4, queue, nextIndex); }
+      else if (part === 5) { q5Index = nextIndex; renderQuestionScreen(5, queue, nextIndex); }
+    }
+  }
+
+  function onPartComplete(part) {
+    saveState();
+    if (part === 1) showScreen('screen-2intro');
+    else if (part === 2) showScreen('screen-2loading');
+    else if (part === 3) showScreen('screen-3loading');
+    else if (part === 4) showScreen('screen-4positions');
+    else if (part === 5) {
+      if (state.miroToken && state.boardId) {
+        writeActionBriefMiroCard().then(() => showScreen('screen-5brief'));
+      } else {
+        showScreen('screen-5brief');
+      }
+    }
+  }
+
+  function getAnswerForKey(part, key) {
+    if (part === 1) return state.zone1.answers[key] || '';
+    if (part === 2) return state.zone2.answers[key] || '';
+    if (part === 3) return state.zone3.answers[key] || '';
+    if (part === 4) return state.zone4.answers[key] || '';
+    if (part === 5) return state.zone5.answers[key] || '';
+    return '';
+  }
+
+  function storeAnswer(part, key, value) {
+    if (part === 1) state.zone1.answers[key] = value;
+    else if (part === 2) state.zone2.answers[key] = value;
+    else if (part === 3) state.zone3.answers[key] = value;
+    else if (part === 4) state.zone4.answers[key] = value;
+    else if (part === 5) state.zone5.answers[key] = value;
+    saveState();
+  }
+
+  function updateWordCount(id, text) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const words = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    el.textContent = words === 0 ? 'Start writing when you\'re ready.' : `${words} words`;
+  }
+
+  // ============================================================
+  // SCREEN 1a — FEELING SELECTOR
+  // ============================================================
+  function initScreen1a() {
+    const cards = document.querySelectorAll('.feeling-card');
+    const continueWrap = document.getElementById('s1a-continue');
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('selected');
+        const selected = document.querySelectorAll('.feeling-card.selected');
+        if (selected.length > 0) {
+          if (!continueWrap.classList.contains('visible')) {
+            continueWrap.classList.add('visible');
+          }
+        } else {
+          continueWrap.classList.remove('visible');
+        }
+      });
+    });
+
+    document.getElementById('btn-1a-continue').addEventListener('click', () => {
+      const selected = document.querySelectorAll('.feeling-card.selected');
+      state.zone1.selections = [];
+      selected.forEach(card => state.zone1.selections.push(card.dataset.key));
+      saveState();
+      buildQ1Queue();
+      renderQuestionScreen(1, q1Queue, 0);
+      showScreen('screen-question-1');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 2intro
+  // ============================================================
+  function initScreen2Intro() {
+    document.getElementById('btn-2intro').addEventListener('click', () => {
+      buildQ2Queue();
+      renderQuestionScreen(2, q2Queue, 0);
+      showScreen('screen-question-2');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 2loading
+  // ============================================================
+  function mountScreen2Loading() {
+    fetchPortrait();
+  }
+
+  async function fetchPortrait() {
+    try {
+      const res = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: state.zone2.answers, zone: 'portrait' })
+      });
+      const data = await res.json();
+      state.portrait = data;
+      saveState();
+      showScreen('screen-2portrait');
+    } catch(e) {
+      // Fallback portrait from answers
+      state.portrait = generateFallbackPortrait();
+      saveState();
+      setTimeout(() => showScreen('screen-2portrait'), 1200);
+    }
+  }
+
+  function generateFallbackPortrait() {
+    const a = state.zone2.answers;
+    const vals = Object.values(a).filter(v => v && v.trim().length > 0);
+    return {
+      bestWork: vals[0] || 'When I have the space to do it properly.',
+      nonNegotiable: vals[2] || 'My integrity and the quality of my work.',
+      headed: vals[5] || 'Somewhere I can make a real contribution.',
+      untried: vals[4] || 'The thing I keep putting off.'
+    };
+  }
+
+  // ============================================================
+  // SCREEN 2portrait
+  // ============================================================
+  function mountScreen2Portrait() {
+    if (!state.portrait) return;
+    const p = state.portrait;
+
+    document.getElementById('portrait-bestWork').textContent = p.bestWork || '';
+    document.getElementById('portrait-nonNegotiable').textContent = p.nonNegotiable || '';
+    document.getElementById('portrait-headed').textContent = p.headed || '';
+    document.getElementById('portrait-untried').textContent = p.untried || '';
+
+    // Animate quadrants
+    const quadrants = document.querySelectorAll('.portrait-quadrant');
+    quadrants.forEach((q, i) => {
+      setTimeout(() => {
+        q.style.animation = `rise 500ms ease forwards`;
+        q.style.animationDelay = '0ms';
+        q.style.opacity = '1';
+      }, i * 150);
+    });
+
+    // Burst rings
+    const card = document.getElementById('portrait-card');
+    setTimeout(() => {
+      const ring1 = document.createElement('div');
+      ring1.className = 'burst-ring';
+      ring1.style.border = '2px solid var(--rose)';
+      ring1.style.animationDelay = '0ms';
+      card.appendChild(ring1);
+
+      const ring2 = document.createElement('div');
+      ring2.className = 'burst-ring';
+      ring2.style.border = '2px solid var(--lilac)';
+      ring2.style.animationDelay = '200ms';
+      ring2.style.opacity = '0';
+      card.appendChild(ring2);
+      setTimeout(() => { ring2.style.animation = 'burstRing 800ms ease-out forwards'; ring2.style.opacity = '1'; }, 200);
+    }, 600);
+  }
+
+  function initScreen2Portrait() {
+    document.getElementById('btn-portrait-continue').addEventListener('click', () => {
+      showScreen('screen-miro');
+    });
+
+    document.getElementById('btn-copy-portrait').addEventListener('click', () => {
+      if (!state.portrait) return;
+      const p = state.portrait;
+      const text = [
+        'MY PORTRAIT',
+        '',
+        'I do my best work when',
+        p.bestWork || '',
+        '',
+        "What I won't compromise on",
+        p.nonNegotiable || '',
+        '',
+        "Where I'm headed",
+        p.headed || '',
+        '',
+        "What I don't want to leave untried",
+        p.untried || ''
+      ].join('\n');
+      copyToClipboard(text, 'btn-copy-portrait', 'Copied.');
+    });
+  }
+
+  // ============================================================
+  // SCREEN miro
+  // ============================================================
+  function mountScreenMiro() {
+    if (!state.portrait) return;
+    const p = state.portrait;
+    document.getElementById('miro-bestWork').textContent = p.bestWork || '';
+    document.getElementById('miro-nonNeg').textContent = p.nonNegotiable || '';
+    document.getElementById('miro-headed').textContent = p.headed || '';
+    document.getElementById('miro-untried').textContent = p.untried || '';
+  }
+
+  function initScreenMiro() {
+    document.getElementById('btn-connect-miro').addEventListener('click', async () => {
+      if (state.miroToken) {
+        await createMiroBoard();
+        showScreen('screen-3intro');
+      } else {
+        window.location.href = '/auth';
+      }
+    });
+
+    document.getElementById('btn-skip-miro').addEventListener('click', () => {
+      showScreen('screen-3intro');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 3intro
+  // ============================================================
+  function initScreen3Intro() {
+    document.getElementById('btn-3intro').addEventListener('click', () => {
+      buildQ3Queue();
+      renderQuestionScreen(3, q3Queue, 0);
+      showScreen('screen-question-3');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 3loading
+  // ============================================================
+  function mountScreen3Loading() {
+    fetchOptions();
+  }
+
+  async function fetchOptions() {
+    try {
+      const res = await fetch('/api/claude', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: state.zone3.answers, zone: 'options' })
+      });
+      const data = await res.json();
+      state.optionsMap = data;
+      saveState();
+      if (state.miroToken && state.boardId) {
+        await writeMiroCard({ content: 'Options Map', type: 'options', x: 500, y: 0 });
+      }
+      showScreen('screen-3options');
+    } catch(e) {
+      state.optionsMap = generateFallbackOptions();
+      saveState();
+      setTimeout(() => showScreen('screen-3options'), 1200);
+    }
+  }
+
+  function generateFallbackOptions() {
+    const answers = state.zone3.answers;
+    const vals = Object.values(answers).filter(v => v && v.trim());
+    const makeOptions = (ans) => {
+      if (!ans) return [{ label: 'Explore further', detail: '' }];
+      const sentences = ans.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      return sentences.slice(0, 3).map(s => ({ label: s.trim().substring(0, 60), detail: '' }));
+    };
+    return {
+      rightNow: makeOptions(vals[0] || ''),
+      buildTowards: makeOptions(vals[3] || ''),
+      notThoughtAbout: makeOptions(vals[6] || ''),
+      currentSituation: makeOptions(vals[9] || '')
+    };
+  }
+
+  // ============================================================
+  // SCREEN 3options
+  // ============================================================
+  function mountScreen3Options() {
+    if (!state.optionsMap) return;
+    const container = document.getElementById('options-sections');
+    const sectionDefs = [
+      { key: 'rightNow', label: 'Right now' },
+      { key: 'buildTowards', label: 'Build towards' },
+      { key: 'notThoughtAbout', label: "Haven't let myself think about" },
+      { key: 'currentSituation', label: 'Current situation' }
+    ];
+    let html = '';
+    sectionDefs.forEach(def => {
+      const options = state.optionsMap[def.key] || [];
+      if (!options.length) return;
+      html += `<div class="options-section">`;
+      html += `<div class="options-section-label">${escapeHtml(def.label)}</div>`;
+      html += `<div class="options-cards">`;
+      options.forEach(opt => {
+        html += `<div class="option-card">
+          <div class="option-card-label">${escapeHtml(opt.label || opt)}</div>
+          ${opt.detail ? `<div class="option-card-detail">${escapeHtml(opt.detail)}</div>` : ''}
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+  }
+
+  function initScreen3Options() {
+    document.getElementById('btn-choose-three').addEventListener('click', () => {
+      showScreen('screen-4intro');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 4intro
+  // ============================================================
+  function initScreen4Intro() {
+    document.getElementById('btn-4intro').addEventListener('click', () => {
+      showScreen('screen-4select');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 4select
+  // ============================================================
+  function mountScreen4Select() {
+    if (!state.optionsMap) return;
+    const container = document.getElementById('select-sections');
+    const sectionDefs = [
+      { key: 'rightNow', label: 'Right now' },
+      { key: 'buildTowards', label: 'Build towards' },
+      { key: 'notThoughtAbout', label: "Haven't let myself think about" },
+      { key: 'currentSituation', label: 'Current situation' }
+    ];
+    let html = '';
+    sectionDefs.forEach(def => {
+      const options = state.optionsMap[def.key] || [];
+      if (!options.length) return;
+      html += `<div class="options-section">`;
+      html += `<div class="options-section-label">${escapeHtml(def.label)}</div>`;
+      html += `<div class="options-cards">`;
+      options.forEach((opt, i) => {
+        const id = `selopt_${def.key}_${i}`;
+        html += `<div class="option-card selectable" data-label="${escapeAttr(opt.label || opt)}" data-id="${id}" id="${id}">
+          <div class="option-card-label">${escapeHtml(opt.label || opt)}</div>
+          ${opt.detail ? `<div class="option-card-detail">${escapeHtml(opt.detail)}</div>` : ''}
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+    container.innerHTML = html;
+
+    // Bind selection logic
+    const cards = container.querySelectorAll('.option-card.selectable');
+    const counter = document.getElementById('select-counter');
+    const confirmBtn = document.getElementById('btn-confirm-three');
+
+    function updateCounter() {
+      const n = container.querySelectorAll('.option-card.selected').length;
+      counter.textContent = `${n} of 3 selected`;
+      confirmBtn.disabled = n !== 3;
+    }
+
+    cards.forEach(card => {
+      card.addEventListener('click', () => {
+        const selected = container.querySelectorAll('.option-card.selected');
+        if (card.classList.contains('selected')) {
+          card.classList.remove('selected');
+        } else if (selected.length < 3) {
+          card.classList.add('selected');
+        }
+        updateCounter();
+      });
+    });
+
+    confirmBtn.addEventListener('click', () => {
+      const selected = Array.from(container.querySelectorAll('.option-card.selected'));
+      state.zone4.selections = selected.map((card, i) => ({
+        label: card.dataset.label,
+        letter: ['A', 'B', 'C'][i]
+      }));
+      saveState();
+
+      const confirmCard = document.getElementById('confirm-card');
+      confirmCard.style.display = 'block';
+      confirmBtn.disabled = true;
+
+      setTimeout(() => {
+        buildQ4Queue();
+        renderQuestionScreen(4, q4Queue, 0);
+        showScreen('screen-question-4');
+      }, 3000);
+    });
+  }
+
+  // ============================================================
+  // SCREEN 4positions
+  // ============================================================
+  function mountScreen4Positions() {
+    const container = document.getElementById('position-cards');
+    let html = '';
+    (state.zone4.selections || []).forEach((sel, idx) => {
+      const letter = sel.letter || ['A', 'B', 'C'][idx];
+      const q1key = `z4${letter}q1`;
+      const q2key = `z4${letter}q2`;
+      const ans1 = state.zone4.answers[q1key] || '(not answered)';
+      const ans2 = state.zone4.answers[q2key] || '(not answered)';
+      html += `
+        <div class="position-card" id="pos-card-${idx}">
+          <div class="position-option-label">Option ${letter}</div>
+          <div class="position-title">${escapeHtml(sel.label || '')}</div>
+          <div class="position-section-label">What it asks of you</div>
+          <div class="position-answer">${escapeHtml(ans1)}</div>
+          <div class="position-section-label">First move</div>
+          <div class="position-answer">${escapeHtml(ans2)}</div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+
+    // Animate cards in
+    const cards = container.querySelectorAll('.position-card');
+    cards.forEach((card, i) => {
+      setTimeout(() => {
+        card.style.animation = `rise 500ms ease forwards`;
+        card.style.opacity = '1';
+      }, i * 200);
+    });
+
+    document.getElementById('btn-4positions').addEventListener('click', () => {
+      if (state.miroToken && state.boardId) {
+        writePositionsMiroCards().then(() => showScreen('screen-5intro'));
+      } else {
+        showScreen('screen-5intro');
+      }
+    });
+  }
+
+  // ============================================================
+  // SCREEN 5intro
+  // ============================================================
+  function initScreen5Intro() {
+    document.getElementById('btn-5intro').addEventListener('click', () => {
+      buildQ5Queue();
+      renderQuestionScreen(5, q5Queue, 0);
+      showScreen('screen-question-5');
+    });
+  }
+
+  // ============================================================
+  // SCREEN 5brief
+  // ============================================================
+  function mountScreen5Brief() {
+    const a = state.zone5.answers;
+    document.getElementById('brief-move').textContent = a.z5q1 || '';
+    document.getElementById('brief-by').textContent = a.z5q2 || '';
+    document.getElementById('brief-because').textContent = a.z5q3 || '';
+
+    // Animate elements
+    ['brief-el-1', 'brief-el-2', 'brief-el-3'].forEach((id, i) => {
+      const el = document.getElementById(id);
+      setTimeout(() => {
+        el.style.animation = `rise 400ms ease forwards`;
+        el.style.opacity = '1';
+      }, i * 150);
+    });
+
+    const canvasBtn = document.getElementById('btn-canvas');
+    if (!state.boardId) {
+      canvasBtn.textContent = 'Copy everything';
+    }
+
+    canvasBtn.addEventListener('click', () => {
+      if (state.boardId) {
+        showToast("Don't forget your towel.", 1500);
+        setTimeout(() => {
+          window.open(`https://miro.com/app/board/${state.boardId}/`, '_blank');
+        }, 1500);
+      } else {
+        copyAllToClipboard();
+        const orig = canvasBtn.textContent;
+        canvasBtn.textContent = 'Copied.';
+        canvasBtn.style.background = 'rgba(255,205,65,0.20)';
+        setTimeout(() => {
+          canvasBtn.textContent = 'Copy everything';
+          canvasBtn.style.background = '';
+        }, 2500);
+      }
+    });
+
+    document.getElementById('btn-copy-brief').addEventListener('click', () => {
+      const a = state.zone5.answers;
+      const text = [
+        'MY ACTION BRIEF',
+        '',
+        'My first move',
+        a.z5q1 || '',
+        '',
+        'By',
+        a.z5q2 || '',
+        '',
+        'Because',
+        a.z5q3 || ''
+      ].join('\n');
+      copyToClipboard(text, 'btn-copy-brief', 'Copied.');
+    });
+  }
+
+  function copyAllToClipboard() {
+    const p = state.portrait || {};
+    const a5 = state.zone5.answers;
+    const text = [
+      "DON'T PANIC -- A HITCHHIKER'S SELF-ASSESSMENT",
+      '',
+      '== MY PORTRAIT ==',
+      '',
+      'I do my best work when',
+      p.bestWork || '',
+      '',
+      "What I won't compromise on",
+      p.nonNegotiable || '',
+      '',
+      "Where I'm headed",
+      p.headed || '',
+      '',
+      "What I don't want to leave untried",
+      p.untried || '',
+      '',
+      '== MY ACTION BRIEF ==',
+      '',
+      'My first move',
+      a5.z5q1 || '',
+      '',
+      'By',
+      a5.z5q2 || '',
+      '',
+      'Because',
+      a5.z5q3 || ''
+    ].join('\n');
+    copyToClipboard(text, 'btn-canvas', 'Copied.');
+  }
+
+  // ============================================================
+  // MIRO API HELPERS
+  // ============================================================
+  async function createMiroBoard() {
+    try {
+      const res = await fetch('/api/miro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: state.miroToken, action: 'create_board' })
+      });
+      const data = await res.json();
+      if (data.boardId) {
+        state.boardId = data.boardId;
+        saveState();
+        if (state.portrait) {
+          await writeMiroCard({ content: formatPortraitForMiro(), type: 'portrait', x: 0, y: 0 });
+        }
+      }
+    } catch(e) { /* silent fail */ }
+  }
+
+  async function writeMiroCard({ content, type, x, y }) {
+    if (!state.miroToken || !state.boardId) return;
+    try {
+      await fetch('/api/miro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: state.miroToken,
+          action: 'write_card',
+          boardId: state.boardId,
+          data: { content, type, x, y }
+        })
+      });
+    } catch(e) { /* silent fail */ }
+  }
+
+  function formatPortraitForMiro() {
+    if (!state.portrait) return '';
+    const p = state.portrait;
+    return `MY PORTRAIT\n\nI do my best work when:\n${p.bestWork}\n\nWhat I won't compromise on:\n${p.nonNegotiable}\n\nWhere I'm headed:\n${p.headed}\n\nWhat I don't want to leave untried:\n${p.untried}`;
+  }
+
+  async function writePositionsMiroCards() {
+    if (!state.miroToken || !state.boardId) return;
+    const selections = state.zone4.selections || [];
+    for (let i = 0; i < selections.length; i++) {
+      const sel = selections[i];
+      const letter = sel.letter || ['A', 'B', 'C'][i];
+      const q1key = `z4${letter}q1`;
+      const q2key = `z4${letter}q2`;
+      const ans1 = state.zone4.answers[q1key] || '';
+      const ans2 = state.zone4.answers[q2key] || '';
+      const content = `Option ${letter}: ${sel.label}\n\nWhat it asks of you:\n${ans1}\n\nFirst move:\n${ans2}`;
+      await writeMiroCard({ content, type: 'position', x: i * 600, y: 400 });
+    }
+  }
+
+  async function writeActionBriefMiroCard() {
+    if (!state.miroToken || !state.boardId) return;
+    const a = state.zone5.answers;
+    const content = `ACTION BRIEF\n\nMy first move:\n${a.z5q1 || ''}\n\nBy:\n${a.z5q2 || ''}\n\nBecause:\n${a.z5q3 || ''}`;
+    await writeMiroCard({ content, type: 'action_brief', x: 0, y: 800 });
+  }
+
+  // ============================================================
+  // UTILITIES
+  // ============================================================
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function escapeAttr(str) {
+    if (!str) return '';
+    return str.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function copyToClipboard(text, btnId, successMsg) {
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById(btnId);
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = successMsg;
+        btn.style.color = 'var(--yellow)';
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.color = '';
+        }, 2500);
+      }
+    }).catch(() => {});
+  }
+
+  function showToast(msg, duration) {
+    const toast = document.getElementById('toast');
+    toast.textContent = msg;
+    toast.classList.add('visible');
+    setTimeout(() => toast.classList.remove('visible'), duration || 2000);
+  }
+
+  // ============================================================
+  // INIT
+  // ============================================================
+  function init() {
+    // Parse URL params
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('token')) state.miroToken = params.get('token');
+    if (params.get('board_id')) state.boardId = params.get('board_id');
+
+    // Load persisted state
+    loadState();
+
+    // If token/board_id came from URL, override
+    if (params.get('token')) state.miroToken = params.get('token');
+    if (params.get('board_id')) state.boardId = params.get('board_id');
+
+    // Bind static event listeners
+    document.getElementById('btn-start').addEventListener('click', () => {
+      showScreen('screen-1a');
+    });
+
+    initScreen1a();
+    initScreen2Intro();
+    initScreen2Portrait();
+    initScreenMiro();
+    initScreen3Intro();
+    initScreen3Options();
+    initScreen4Intro();
+    initScreen5Intro();
+
+    // Rebuild queues if resuming mid-session
+    if (state.zone1.selections && state.zone1.selections.length > 0) {
+      buildQ1Queue();
+      // Restore q1 index
+      q1Index = Object.keys(state.zone1.answers).length;
+    }
+    if (Object.keys(state.zone2.answers).length > 0) {
+      buildQ2Queue();
+      q2Index = Math.min(Object.keys(state.zone2.answers).length, q2Queue.length - 1);
+    }
+    if (Object.keys(state.zone3.answers).length > 0) {
+      buildQ3Queue();
+      q3Index = Math.min(Object.keys(state.zone3.answers).length, q3Queue.length - 1);
+    }
+    if (state.zone4.selections && state.zone4.selections.length > 0) {
+      buildQ4Queue();
+      q4Index = Math.min(Object.keys(state.zone4.answers).length, q4Queue.length - 1);
+    }
+    buildQ5Queue();
+
+    // Restore question screen state if resuming
+    const screenId = state.currentScreen;
+    if (screenId === 'screen-question-1' && q1Queue.length > 0) {
+      renderQuestionScreen(1, q1Queue, q1Index);
+    } else if (screenId === 'screen-question-2' && q2Queue.length > 0) {
+      renderQuestionScreen(2, q2Queue, q2Index);
+    } else if (screenId === 'screen-question-3' && q3Queue.length > 0) {
+      renderQuestionScreen(3, q3Queue, q3Index);
+    } else if (screenId === 'screen-question-4' && q4Queue.length > 0) {
+      renderQuestionScreen(4, q4Queue, q4Index);
+    } else if (screenId === 'screen-question-5') {
+      renderQuestionScreen(5, q5Queue, q5Index);
+    }
+
+    showScreen(state.currentScreen);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

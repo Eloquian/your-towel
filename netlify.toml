@@ -1,14 +1,23 @@
 [build]
-  command = "npm run build"
-  publish = "build"
+  publish = "."
   functions = "netlify/functions"
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/auth"
+  to = "/.netlify/functions/auth"
   status = 200
 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/auth/callback"
+  to = "/.netlify/functions/callback"
+  status = 200
+
+[[redirects]]
+  from = "/api/miro"
+  to = "/.netlify/functions/miro"
+  status = 200
+
+[[redirects]]
+  from = "/api/claude"
+  to = "/.netlify/functions/claude"
   status = 200
