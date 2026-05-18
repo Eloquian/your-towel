@@ -2201,11 +2201,11 @@
         body: JSON.stringify({ answers: state.zone2.answers, zone: 'portrait' })
       });
       const data = await res.json();
+      if (!res.ok || !data.bestWork) throw new Error(data.error || 'Bad response');
       state.portrait = data;
       saveState();
       showScreen('screen-2portrait');
     } catch(e) {
-      // Fallback portrait from answers
       state.portrait = generateFallbackPortrait();
       saveState();
       setTimeout(() => showScreen('screen-2portrait'), 1200);
@@ -2344,6 +2344,7 @@
         body: JSON.stringify({ answers: state.zone3.answers, zone: 'options' })
       });
       const data = await res.json();
+      if (!res.ok || !data.rightNow) throw new Error(data.error || 'Bad response');
       state.optionsMap = data;
       saveState();
       if (state.miroToken && state.boardId) {
