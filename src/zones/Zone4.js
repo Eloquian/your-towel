@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function Zone4({ onNext, onDataUpdate, zone3Answers }) {
+export default function Zone4({ onNext, onDataUpdate, zone3Answers, miro, selectedOptions: existingSelectedOptions }) {
   const [phase, setPhase] = useState('bridge'); // 'bridge' | 'select' | 'questions' | 'reveal'
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [currentOptionIndex, setCurrentOptionIndex] = useState(0);
@@ -37,6 +37,9 @@ export default function Zone4({ onNext, onDataUpdate, zone3Answers }) {
     } else {
       setPhase('reveal');
       onDataUpdate({ zone4Answers: answers, selectedOptions });
+      if (miro.boardId) {
+        miro.exportPositions(miro.boardId, selectedOptions, answers);
+      }
     }
   };
 

@@ -69,7 +69,7 @@ const GROUPS = (portrait) => [
   },
 ];
 
-export default function Zone3({ onNext, onDataUpdate, portrait }) {
+export default function Zone3({ onNext, onDataUpdate, portrait, miro, optionsMap: existingOptionsMap }) {
   const [phase, setPhase] = useState('intro'); // 'intro' | 'questions' | 'assembling' | 'map'
   const [groupIndex, setGroupIndex] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -93,6 +93,9 @@ export default function Zone3({ onNext, onDataUpdate, portrait }) {
         setOptionsMap(result);
         setPhase('map');
         onDataUpdate({ zone3Answers: answers, optionsMap: result });
+        if (miro.boardId) {
+          miro.exportOptionsMap(miro.boardId, result);
+        }
       } catch (err) {
         setError('Something went wrong. Please try again.');
         setPhase('questions');

@@ -5,7 +5,7 @@ const GROUPS = [
   {
     id: 'past',
     heading: 'Who you were',
-    note: 'Think about your work before things got complicated. This isn't nostalgia. It's evidence.',
+    note: "Think about your work before things got complicated. This isn't nostalgia. It's evidence.",
     questions: [
       { id: 'q1', text: 'What kind of work made you lose track of time? Not the job title. The actual work.' },
       { id: 'q2', text: 'What did the people who rated you most highly say about you? If you find that hard to remember, what would you want them to have said?' },
@@ -34,12 +34,13 @@ const GROUPS = [
   },
 ];
 
-export default function Zone2({ onNext, onDataUpdate }) {
+export default function Zone2({ onNext, onDataUpdate, miro }) {
   const [groupIndex, setGroupIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [phase, setPhase] = useState('questions'); // 'questions' | 'assembling' | 'portrait'
+  const [phase, setPhase] = useState('questions'); // 'questions' | 'assembling' | 'portrait' | 'miro'
   const [portrait, setPortrait] = useState(null);
   const [error, setError] = useState(null);
+  const [miroStatus, setMiroStatus] = useState(null);
 
   const currentGroup = GROUPS[groupIndex];
 
@@ -65,6 +66,26 @@ export default function Zone2({ onNext, onDataUpdate }) {
   };
 
   const handleContinue = () => {
+    setPhase('miro');
+  };
+
+  const handleConnectMiro = async () => {
+    if (miro.miroToken) {
+      setMiroStatus('creating');
+      const newBoardId = await miro.createBoard();
+      if (newBoardId) {
+        setMiroStatus('exporting');
+        await miro.exportPortrait(newBoardId, portrait);
+        setMiroStatus('done');
+      } else {
+        setMiroStatus('error');
+      }
+    } else {
+      miro.connectMiro();
+    }
+  };
+
+  const handleSkipMiro = () => {
     onNext();
   };
 
@@ -126,6 +147,56 @@ export default function Zone2({ onNext, onDataUpdate }) {
             </button>
           </div>
           <p className="easter-egg fade-up fade-up-delay-5">There you are.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (phase === 'miro') {
+    return (
+      <div className="screen">
+        <div className="screen-inner">
+          <p className="supertitle fade-up fade-up-delay-1">What you know about yourself</p>
+          <div className="orange-rule fade-up fade-up-delay-2" />
+          <h2 className="zone-heading fade-up fade-up-delay-3">Let's give it somewhere to live.</h2>
+
+          <p className="body-copy fade-up fade-up-delay-3">
+            Your portrait is ready. Connect your Miro account and it will be waiting for you there, along with everything you build from here.
+          </p>
+          <p className="body-copy fade-up fade-up-delay-3">
+            The canvas is yours. It lives in your account, not ours. You can return to it whenever the situation shifts.
+          </p>
+
+          {miroStatus === 'done' && (
+            <p className="body-copy fade-up fade-up-delay-3" style={{ color: 'var(--orange)' }}>
+              Portrait exported to your Miro board.
+            </p>
+          )}
+          {miroStatus === 'error' && (
+            <p className="body-copy fade-up fade-up-delay-3" style={{ color: 'var(--orange)' }}>
+              Something went wrong connecting to Miro. You can try again or continue without it.
+            </p>
+          )}
+
+          <div className="fade-up fade-up-delay-4" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            {miroStatus !== 'done' && (
+              <button
+                className="btn-primary"
+                onClick={handleConnectMiro}
+                disabled={miroStatus === 'creating' || miroStatus === 'exporting'}
+              >
+                {miroStatus === 'creating' ? 'Creating board...' :
+                 miroStatus === 'exporting' ? 'Exporting portrait...' :
+                 miro.miroToken ? 'Export to Miro' : 'Connect Miro'}
+              </button>
+            )}
+            <button className="btn-primary" onClick={handleSkipMiro} style={miroStatus !== 'done' ? { background: 'transparent', border: '1px solid rgba(255,255,255,0.2)' } : {}}>
+              {miroStatus === 'done' ? 'Continue' : 'Continue without Miro'}
+            </button>
+          </div>
+          <p className="easter-egg fade-up fade-up-delay-5" style={{ marginTop: '24px' }}>
+            Connecting Miro only creates a new board in your account. We don't read your existing boards or store your data.
+          </p>
         </div>
       </div>
     );

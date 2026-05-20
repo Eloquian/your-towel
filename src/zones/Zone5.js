@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 
-export default function Zone5({ onDataUpdate, selectedOptions }) {
+export default function Zone5({ onDataUpdate, selectedOptions, miro, appData }) {
   const [phase, setPhase] = useState('questions'); // 'questions' | 'brief'
   const [move, setMove] = useState('');
   const [timeframe, setTimeframe] = useState('');
   const [why, setWhy] = useState('');
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     const brief = { move, timeframe, why };
     onDataUpdate({ zone5Brief: brief });
+    if (miro.boardId) {
+      await miro.exportActionBrief(miro.boardId, brief);
+    }
     setPhase('brief');
   };
 
@@ -44,9 +47,15 @@ export default function Zone5({ onDataUpdate, selectedOptions }) {
           </div>
 
           <div className="fade-up fade-up-delay-5">
-            <button className="btn-primary" onClick={() => window.scrollTo(0, 0)}>
-              Take me to my canvas.
-            </button>
+            {miro.boardId ? (
+              <button className="btn-primary" onClick={() => window.open(`https://miro.com/app/board/${miro.boardId}/`, '_blank')}>
+                Open my Miro canvas
+              </button>
+            ) : (
+              <button className="btn-primary" onClick={() => window.scrollTo(0, 0)}>
+                Back to top
+              </button>
+            )}
           </div>
           <p className="easter-egg fade-up fade-up-delay-5">Don't forget your towel.</p>
         </div>
