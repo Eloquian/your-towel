@@ -7,12 +7,14 @@ import Zone2 from './zones/Zone2';
 import Zone3 from './zones/Zone3';
 import Zone4 from './zones/Zone4';
 import Zone5 from './zones/Zone5';
+import useMiro from './hooks/useMiro';
 
 const ZONES = ['Ground', 'Empathise', 'Define', 'Ideate', 'Prototype', 'Test'];
 
 export default function App() {
   const [zone, setZone] = useState(0);
   const [appData, setAppData] = useState({});
+  const miro = useMiro();
 
   const updateData = (newData) => {
     setAppData(prev => ({ ...prev, ...newData }));
@@ -34,12 +36,14 @@ export default function App() {
 
       {zone === 0 && <Zone0 onNext={next} />}
       {zone === 1 && <Zone1 onNext={next} onDataUpdate={updateData} />}
-      {zone === 2 && <Zone2 onNext={next} onDataUpdate={updateData} />}
+      {zone === 2 && <Zone2 onNext={next} onDataUpdate={updateData} miro={miro} />}
       {zone === 3 && (
         <Zone3
           onNext={next}
           onDataUpdate={updateData}
           portrait={appData.portrait}
+          miro={miro}
+          optionsMap={appData.optionsMap}
         />
       )}
       {zone === 4 && (
@@ -47,12 +51,16 @@ export default function App() {
           onNext={next}
           onDataUpdate={updateData}
           zone3Answers={appData.zone3Answers}
+          miro={miro}
+          selectedOptions={appData.selectedOptions}
         />
       )}
       {zone === 5 && (
         <Zone5
           onDataUpdate={updateData}
           selectedOptions={appData.selectedOptions}
+          miro={miro}
+          appData={appData}
         />
       )}
     </div>
